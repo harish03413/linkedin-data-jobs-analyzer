@@ -137,3 +137,12 @@ For Data Analyst-related roles:
 - Python: 139 postings
 - Tableau: 136 postings
 - Power BI: 112 postings
+## AWS S3 Storage
+
+The raw LinkedIn job-posting CSV is stored in an Amazon S3 bucket.
+
+```text
+s3://harish03413-linkedin-data-jobs-2026 /linkedin_data_jobs.csv
+```
+
+The bucket is private, and public access remains blocked.
