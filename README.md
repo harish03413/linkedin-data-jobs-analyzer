@@ -111,3 +111,29 @@ python run_queries.py
 ### Technical Skill Demand
 
 ![Technical skill demand](skill_demand.png)
+
+## Results
+
+### Most Common Job Titles
+
+- Data Analyst: 152 postings
+- Data Scientist: 75 postings
+- Data Engineer: 58 postings
+
+### Most Requested Skills
+
+- SQL: 759 postings
+- Python: 700 postings
+- Excel: 491 postings
+- Machine Learning: 377 postings
+- AWS: 305 postings
+
+### Data Analyst Skills
+
+For Data Analyst-related roles:
+
+- SQL: 232 postings
+- Excel: 164 postings
+- Python: 139 postings
+- Tableau: 136 postings
+- Power BI: 112 postings
