@@ -146,3 +146,12 @@ s3://harish03413-linkedin-data-jobs-2026 /linkedin_data_jobs.csv
 ```
 
 The bucket is private, and public access remains blocked.
+## Streamlit Dashboard
+
+Run the dashboard locally:
+
+```powershell
+python -m streamlit run dashboard.py
+```
+
+The dashboard provides filters and visualizations for job titles, companies, locations, and technical skills.
