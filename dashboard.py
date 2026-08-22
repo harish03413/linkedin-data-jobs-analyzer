@@ -2,20 +2,27 @@ import streamlit as st
 import duckdb
 import pandas as pd
 
+
 st.set_page_config(
     page_title="LinkedIn Data Jobs Analyzer",
     page_icon="📊",
     layout="wide"
 )
 
+
 st.title("LinkedIn Data Jobs Analyzer")
 st.write(
     "Explore job titles, locations, companies, and technical skill demand."
 )
 
+
 @st.cache_resource
 def get_connection():
-    return duckdb.connect("job_postings.duckdb", read_only=True)
+    return duckdb.connect(
+        "job_postings.duckdb",
+        read_only=True
+    )
+
 
 @st.cache_data
 def load_data():
@@ -24,30 +31,87 @@ def load_data():
         "SELECT * FROM job_postings"
     ).fetchdf()
 
-df = load_data()
+
+st.sidebar.header("Upload Data")
+
+uploaded_file = st.sidebar.file_uploader(
+    "Upload a job dataset",
+    type=["csv"]
+)
+
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+    st.success(f"Loaded file: {uploaded_file.name}")
+
+    source_name = st.sidebar.text_input(
+        "Enter source name",
+        value="Other"
+    )
+
+    df["source"] = source_name
+
+else:
+    df = load_data()
+    st.info("Using the default database dataset.")
+
+
+required_columns = [
+    "title",
+    "company",
+    "location"
+]
+
+missing_columns = [
+    column
+    for column in required_columns
+    if column not in df.columns
+]
+
+if missing_columns:
+    st.error(
+        "The uploaded file is missing these columns: "
+        + ", ".join(missing_columns)
+    )
+    st.stop()
+
 
 st.sidebar.header("Filters")
 
+
 locations = sorted(
-    df["location"].dropna().astype(str).unique().tolist()
+    df["location"]
+    .dropna()
+    .astype(str)
+    .unique()
+    .tolist()
 )
+
 
 selected_location = st.sidebar.selectbox(
     "Select location",
     ["All locations"] + locations
 )
 
+
 filtered_df = df.copy()
+
 
 if selected_location != "All locations":
     filtered_df = filtered_df[
         filtered_df["location"].astype(str) == selected_location
     ]
 
+
 col1, col2, col3 = st.columns(3)
 
+
 with col1:
-    st.metric("Total postings", len(filtered_df))
+    st.metric(
+        "Total postings",
+        len(filtered_df)
+    )
+
 
 with col2:
     st.metric(
@@ -55,21 +119,26 @@ with col2:
         filtered_df["company"].nunique()
     )
 
+
 with col3:
     st.metric(
         "Locations",
         filtered_df["location"].nunique()
     )
 
+
 st.subheader("Top Job Titles")
+
 
 title_counts = (
     filtered_df["title"]
+    .dropna()
     .value_counts()
     .head(10)
     .rename_axis("title")
     .reset_index(name="job_count")
 )
+
 
 st.bar_chart(
     title_counts,
@@ -78,15 +147,19 @@ st.bar_chart(
     horizontal=True
 )
 
+
 st.subheader("Top Hiring Companies")
+
 
 company_counts = (
     filtered_df["company"]
+    .dropna()
     .value_counts()
     .head(10)
     .rename_axis("company")
     .reset_index(name="job_count")
 )
+
 
 st.bar_chart(
     company_counts,
@@ -95,7 +168,9 @@ st.bar_chart(
     horizontal=True
 )
 
+
 st.subheader("Technical Skill Demand")
+
 
 skill_columns = {
     "SQL": "skill_sql",
@@ -107,28 +182,49 @@ skill_columns = {
     "Machine Learning": "skill_machine_learning"
 }
 
+
 skill_results = []
+
 
 for skill_name, column_name in skill_columns.items():
     if column_name in filtered_df.columns:
-        count = filtered_df[column_name].fillna(0).astype(int).sum()
+        count = (
+            filtered_df[column_name]
+            .fillna(False)
+            .astype(bool)
+            .sum()
+        )
+
         skill_results.append({
             "skill": skill_name,
             "job_count": count
         })
 
-skill_df = pd.DataFrame(skill_results)
-skill_df = skill_df.sort_values("job_count", ascending=False)
 
-st.bar_chart(
-    skill_df,
-    x="skill",
-    y="job_count"
-)
+skill_df = pd.DataFrame(skill_results)
+
+
+if not skill_df.empty:
+    skill_df = skill_df.sort_values(
+        "job_count",
+        ascending=False
+    )
+
+    st.bar_chart(
+        skill_df,
+        x="skill",
+        y="job_count"
+    )
+else:
+    st.info(
+        "No skill columns are available in this dataset."
+    )
+
 
 st.subheader("Filtered Data")
 
+
 st.dataframe(
     filtered_df.head(100),
-    use_container_width=True
+    width="stretch"
 )
