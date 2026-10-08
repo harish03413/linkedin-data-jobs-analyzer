@@ -1,4 +1,4 @@
-# LinkedIn Data Jobs Analyzer
+# Data Jobs Analyzer
 
 ## Overview
 
